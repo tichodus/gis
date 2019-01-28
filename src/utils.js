@@ -1,5 +1,6 @@
 import L from "leaflet"
-const url = 'http://localhost:8080/geoserver/gis/wms';
+import $ from "jquery"  
+const url = 'http://localhost:8080/geoserver/test-ws/wms';
 export const create = (map) => (url) => (layers) => {
     return L.tileLayer.wms(url, {
         layers,
@@ -32,5 +33,26 @@ export const feature = (map) => (url) => (layers) => {
         datatype: 'json',
         jsonCallback: 'getJson',
         success: loadGeoJson
+    });
+}
+
+export const featureInfo = (map) => (url) => (currentLayer) => (lng, lat) => {
+    var defaultParameters = {
+        service: 'WFS',
+        version: '1.0.0',
+        request: 'GetFeature',
+        typeName: currentLayer,
+        format_options: 'callback:getJson',
+        outputFormat: 'text/javascript',
+        SrsName: 'EPSG:4326',
+    };
+
+    $.ajax({
+    url: url + L.Util.getParamString(defaultParameters),
+    dataType: 'jsonp',
+    success: (data) => {
+        console.log(data)
+    },
+        error: (er) => console.log(er)
     });
 }
